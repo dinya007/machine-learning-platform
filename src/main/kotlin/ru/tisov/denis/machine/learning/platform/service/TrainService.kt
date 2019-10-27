@@ -36,13 +36,13 @@ class TrainService(val jmsTemplate: JmsTemplate, val trainingJobDao: TrainingJob
         val jobId = UUID.randomUUID()
 
         val directory = "${Folders.DATA.path}/$jobId"
-        val path = Paths.get("${Folders.DATA.path}/$jobId/train.csv")
+        val dataPath = Paths.get("${Folders.DATA.path}/$jobId/train.csv")
         Files.createDirectories(Paths.get(directory))
-        Files.write(path, file.bytes)
+        Files.write(dataPath, file.bytes)
 
         trainingJobDao.save(TrainingJob(jobId, TrainingJobStatus.STARTED))
 
-        val message = MachineLearningTrainRequest(path.toAbsolutePath().toString())
+        val message = MachineLearningTrainRequest(dataPath.toAbsolutePath().toString())
         jmsTemplate.convertAndSend(REGRESSION_TRAIN_REQUEST_QUEUE, message,
                 CorrelationIdPostProcessor(jobId.toString(), REGRESSION_TRAIN_RESPONSE_QUEUE))
 
@@ -59,7 +59,7 @@ class TrainService(val jmsTemplate: JmsTemplate, val trainingJobDao: TrainingJob
 
         println(trainingJobDao.get(jobId))
 
-        predictService.predict(jobId, "data/test.csv")
+//        predictService.predict(jobId, "data/test.csv")
     }
 
 }

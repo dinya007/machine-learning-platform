@@ -1,6 +1,6 @@
 package ru.tisov.denis.machine.learning.platform.entity
 
-enum class PredictingJobStatus {
+enum class PredictionStatus {
     STARTED,
     SUCCESS,
     ERROR

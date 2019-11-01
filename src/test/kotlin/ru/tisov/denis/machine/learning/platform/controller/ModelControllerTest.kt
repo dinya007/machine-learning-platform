@@ -7,14 +7,14 @@ import org.springframework.http.HttpStatus
 import ru.tisov.denis.machine.learning.platform.IntegrationTest
 
 
-internal class TrainControllerTest : IntegrationTest() {
+internal class ModelControllerTest : IntegrationTest() {
 
     @Test
     fun shouldSaveJobAndPublishMessage() {
         given()
                 .multiPart("/data/train.csv".classpathFile())
                 .`when`()
-                .post("/train")
+                .post("/models/train")
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .log().all()

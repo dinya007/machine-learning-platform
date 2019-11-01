@@ -13,7 +13,7 @@ import ru.tisov.denis.machine.learning.platform.entity.ModelStatus
 import ru.tisov.denis.machine.learning.platform.entity.ModelType
 import java.util.*
 
-internal class PredictControllerTest : IntegrationTest() {
+internal class PredictionControllerTest : IntegrationTest() {
 
     @Autowired
     lateinit var modelDao: ModelDao
@@ -27,7 +27,7 @@ internal class PredictControllerTest : IntegrationTest() {
                 .multiPart("/data/test.csv".classpathFile())
                 .param("modelId", modelId)
                 .`when`()
-                .post("/predict")
+                .post("/predictions/predict")
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .log().all()

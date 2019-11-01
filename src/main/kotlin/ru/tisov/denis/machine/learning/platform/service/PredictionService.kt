@@ -21,7 +21,7 @@ class PredictionService(val jmsTemplate: JmsTemplate, val predictionDao: Predict
 
     fun predict(modelId: UUID, file: MultipartFile): UUID {
         val predictionId = UUID.randomUUID()
-        val model = modelDao.get(modelId)
+        val model = modelDao.getById(modelId)
         val dataPath = "${Folders.DATA.path}/${model.datasetId}/$modelId/$predictionId/data.csv"
         val resultPath = "${Folders.DATA.path}/${model.datasetId}/$modelId/$predictionId/result.csv"
 
@@ -39,10 +39,18 @@ class PredictionService(val jmsTemplate: JmsTemplate, val predictionDao: Predict
     fun listenPredictResultsQueue(@Header(JmsHeaders.CORRELATION_ID) predictionId: UUID, response: PredictionResponse) {
         println("Prediction response was received: $response with correlation id: $predictionId")
 
-        val prediction = predictionDao.get(predictionId)
+        val prediction = predictionDao.getById(predictionId)
         predictionDao.save(prediction.copy(status = response.status))
 
-        println(predictionDao.get(predictionId))
+        println(predictionDao.getById(predictionId))
+    }
+
+    fun findAllByModelId(modelId: UUID): List<Prediction> {
+        return predictionDao.findAllByModelId(modelId)
+    }
+
+    fun get(predictionId: UUID): Prediction {
+        return predictionDao.getById(predictionId)
     }
 
 //    fun predict(modelId: UUID, dataPath: String): UUID {

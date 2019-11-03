@@ -5,7 +5,6 @@ import org.springframework.jms.core.JmsTemplate
 import org.springframework.jms.support.JmsHeaders
 import org.springframework.messaging.handler.annotation.Header
 import org.springframework.stereotype.Service
-import org.springframework.web.multipart.MultipartFile
 import ru.tisov.denis.machine.learning.platform.dao.FSDao
 import ru.tisov.denis.machine.learning.platform.dao.ModelDao
 import ru.tisov.denis.machine.learning.platform.dao.PredictionDao
@@ -19,13 +18,13 @@ import java.util.*
 @Service
 class PredictionService(val jmsTemplate: JmsTemplate, val predictionDao: PredictionDao, val modelDao: ModelDao, val fsDao: FSDao) {
 
-    fun predict(modelId: UUID, file: MultipartFile): UUID {
+    fun predict(modelId: UUID, file: ByteArray): UUID {
         val predictionId = UUID.randomUUID()
         val model = modelDao.getById(modelId)
         val dataPath = "${Folders.DATA.path}/${model.datasetId}/$modelId/$predictionId/data.csv"
         val resultPath = "${Folders.DATA.path}/${model.datasetId}/$modelId/$predictionId/result.csv"
 
-        fsDao.writeFile(dataPath, file.bytes)
+        fsDao.writeFile(dataPath, file)
         predictionDao.save(Prediction(predictionId, modelId, dataPath, PredictionStatus.STARTED, resultPath))
 
         val message = PredictionRequest(dataPath, model.modelPath, resultPath)
@@ -52,23 +51,6 @@ class PredictionService(val jmsTemplate: JmsTemplate, val predictionDao: Predict
     fun get(predictionId: UUID): Prediction {
         return predictionDao.getById(predictionId)
     }
-
-//    fun predict(modelId: UUID, dataPath: String): UUID {
-//        val predictionId = UUID.randomUUID()
-//        val model = modelDao.get(modelId)
-//
-//        val dataPath = "${Folders.DATA.path}/${model.datasetId}/$modelId/$predictionId/result.csv"
-//        val modelPath = model.modelPath
-//        val resultPath = "${Folders.DATA.path}/${model.datasetId}/$modelId/$predictionId/result.csv"
-//
-//        predictionDao.save(Prediction(predictionId, PredictionStatus.STARTED))
-//
-//        val message = MachineLearningPredictRequest(modelId, dataPath, modelPath)
-//        jmsTemplate.convertAndSend(REGRESSION_PREDICT_REQUEST_QUEUE, message,
-//                CorrelationIdPostProcessor(predictionId.toString(), REGRESSION_PREDICT_RESPONSE_QUEUE))
-//        println("Predicting request was sent $message with correlation id: $predictionId")
-//        return predictionId
-//    }
 
 }
 

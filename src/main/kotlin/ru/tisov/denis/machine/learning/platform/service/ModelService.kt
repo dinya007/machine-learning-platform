@@ -5,7 +5,6 @@ import org.springframework.jms.core.JmsTemplate
 import org.springframework.jms.support.JmsHeaders
 import org.springframework.messaging.handler.annotation.Header
 import org.springframework.stereotype.Service
-import org.springframework.web.multipart.MultipartFile
 import ru.tisov.denis.machine.learning.platform.controller.dto.TrainResponse
 import ru.tisov.denis.machine.learning.platform.dao.DatasetDao
 import ru.tisov.denis.machine.learning.platform.dao.FSDao
@@ -19,13 +18,13 @@ import java.util.*
 @Service
 class ModelService(val jmsTemplate: JmsTemplate, val datasetDao: DatasetDao, val modelDao: ModelDao, val fsDao: FSDao) {
 
-    fun train(file: MultipartFile): TrainResponse {
+    fun train(file: ByteArray): TrainResponse {
         val datasetId = UUID.randomUUID()
         val modelId = UUID.randomUUID()
         val datasetPath = "${Folders.DATA.path}/$datasetId/data.csv"
         val modelPath = "${Folders.DATA.path}/$datasetId/$modelId/model"
 
-        fsDao.writeFile(datasetPath, file.bytes)
+        fsDao.writeFile(datasetPath, file)
         datasetDao.save(Dataset(datasetId, datasetPath))
         modelDao.save(Model(modelId, datasetId, ModelType.REGRESSION, Algorithm.XG_BOOST, ModelStatus.STARTED, modelPath))
 
@@ -51,21 +50,6 @@ class ModelService(val jmsTemplate: JmsTemplate, val datasetDao: DatasetDao, val
     fun get(id: UUID): Model {
         return modelDao.getById(id)
     }
-
-//    fun train(filePath: String): UUID {
-//
-//
-//        val jobId = UUID.randomUUID()
-//        val message = ModelTrainRequest(filePath)
-//
-//        modelDao.save(Model(jobId, ModelStatus.STARTED))
-//
-//        jmsTemplate.convertAndSend(REGRESSION_TRAIN_REQUEST_QUEUE, message,
-//                CorrelationIdPostProcessor(jobId.toString(), REGRESSION_TRAIN_RESPONSE_QUEUE))
-//
-//        println("Training request was sent $message with correlation id: $jobId")
-//        return jobId
-//    }
 
 }
 

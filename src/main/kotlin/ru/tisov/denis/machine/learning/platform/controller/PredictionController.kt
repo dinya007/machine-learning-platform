@@ -19,16 +19,9 @@ import java.util.*
 @CrossOrigin(origins = ["http://localhost:3000"])
 class PredictionController(val predictionService: PredictionService) {
 
-//    @GetMapping("/predict")
-//    fun testPredict(@RequestParam trainingJobId: UUID, @RequestParam(defaultValue = "data/test.csv") filePath: String): PredictResponse {
-//        return PredictResponse(predictionService.predict(trainingJobId, filePath))
-//    }
-
     @PostMapping("/predict")
     fun predict(@RequestParam modelId: UUID, file: MultipartFile): PredictResponse {
-        return PredictResponse(predictionService.predict(modelId, file))
-//        println(file)
-//        return PredictResponse(UUID.randomUUID())
+        return PredictResponse(predictionService.predict(modelId, file.bytes))
     }
 
     @GetMapping("/modelId/{modelId}")

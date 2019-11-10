@@ -7,32 +7,31 @@ import org.springframework.messaging.handler.annotation.Header
 import org.springframework.stereotype.Service
 import ru.tisov.denis.machine.learning.platform.controller.dto.TrainResponse
 import ru.tisov.denis.machine.learning.platform.dao.DatasetDao
-import ru.tisov.denis.machine.learning.platform.dao.FSDao
 import ru.tisov.denis.machine.learning.platform.dao.ModelDao
-import ru.tisov.denis.machine.learning.platform.entity.*
+import ru.tisov.denis.machine.learning.platform.entity.Algorithm
+import ru.tisov.denis.machine.learning.platform.entity.Model
+import ru.tisov.denis.machine.learning.platform.entity.ModelStatus
+import ru.tisov.denis.machine.learning.platform.entity.ModelType
 import ru.tisov.denis.machine.learning.platform.service.dto.ModelTrainRequest
 import ru.tisov.denis.machine.learning.platform.service.dto.ModelTrainResponse
 import java.util.*
 
 
 @Service
-class ModelService(val jmsTemplate: JmsTemplate, val datasetDao: DatasetDao, val modelDao: ModelDao, val fsDao: FSDao) {
+class ModelService(val jmsTemplate: JmsTemplate, val datasetDao: DatasetDao, val modelDao: ModelDao) {
 
-    fun train(file: ByteArray): TrainResponse {
-        val datasetId = UUID.randomUUID()
+    fun train(datasetId: UUID): TrainResponse {
         val modelId = UUID.randomUUID()
-        val datasetPath = "${Folders.DATA.path}/$datasetId/data.csv"
         val modelPath = "${Folders.DATA.path}/$datasetId/$modelId/model"
 
-        fsDao.writeFile(datasetPath, file)
-        datasetDao.save(Dataset(datasetId, datasetPath))
+        val dataset = datasetDao.getById(datasetId)
         modelDao.save(Model(modelId, datasetId, ModelType.REGRESSION, Algorithm.XG_BOOST, ModelStatus.STARTED, modelPath))
 
-        val message = ModelTrainRequest(datasetPath, modelPath)
+        val message = ModelTrainRequest(dataset.dataPath, modelPath)
         jmsTemplate.convertAndSend(REGRESSION_TRAIN_REQUEST_QUEUE, message,
                 CorrelationIdPostProcessor(modelId.toString(), REGRESSION_TRAIN_RESPONSE_QUEUE))
         println("Training model request was sent $message with correlation id: $modelId")
-        return TrainResponse(datasetId, modelId)
+        return TrainResponse(modelId)
     }
 
     @JmsListener(destination = REGRESSION_TRAIN_RESPONSE_QUEUE)

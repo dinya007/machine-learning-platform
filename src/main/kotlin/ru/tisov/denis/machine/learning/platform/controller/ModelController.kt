@@ -22,9 +22,9 @@ class ModelController(val modelService: ModelService) {
         return modelService.getAllByDatasetId(datasetId)
     }
 
-    @PostMapping("/train")
-    fun train(@RequestParam("file") file: MultipartFile): TrainResponse {
-        return modelService.train(file.bytes)
+    @PostMapping("/train/{datasetId}")
+    fun train(@PathVariable("datasetId") datasetId: UUID): TrainResponse {
+        return modelService.train(datasetId)
     }
 
 }

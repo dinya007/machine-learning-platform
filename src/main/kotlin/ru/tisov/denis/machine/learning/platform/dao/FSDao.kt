@@ -4,4 +4,6 @@ interface FSDao {
 
     fun writeFile(path: String, content: ByteArray)
 
+    fun readFile(path: String): String
+
 }

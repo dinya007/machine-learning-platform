@@ -38,7 +38,9 @@ class ModelService(val jmsTemplate: JmsTemplate, val datasetDao: DatasetDao, val
     fun listenQueue(@Header(JmsHeaders.CORRELATION_ID) modelId: UUID, response: ModelTrainResponse) {
         println("Training model response was received: $response with correlation id: $modelId")
         val model = modelDao.getById(modelId)
-        modelDao.save(model.copy(status = response.status))
+        val mean = response.modelAnalysis?.mean
+        val std = response.modelAnalysis?.std
+        modelDao.save(model.copy(status = response.status, mean = mean, std = std))
         println(modelDao.getById(modelId))
     }
 

@@ -20,9 +20,9 @@ fun main(args: Array<String>) {
     val modelService = context.getBean(ModelService::class.java)
     val predictionService = context.getBean(PredictionService::class.java)
     val response = datasetService.create(Files.readAllBytes(Paths.get("/Users/denis/IdeaProjects/machine-learning-analyzer/data/train.csv")))
-    Thread.sleep(10_000)
+    Thread.sleep(5_000)
     val trainResponse = modelService.train(response.datasetId)
-    timer(initialDelay = 30000, period = 600000, action = {
+    timer(initialDelay = 60000, period = 600000, action = {
         predictionService.predict(trainResponse.modelId, Files.readAllBytes(Paths.get("/Users/denis/IdeaProjects/machine-learning-analyzer/data/test.csv")))
     })
 }
